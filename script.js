@@ -1,30 +1,29 @@
 class State {
-    constructor ( parent,value,depth,turn,pieces ) {
+    constructor ( parent,value,depth,turn,pieces,blackPieces, whitePieces) {
         this.parent=parent;
         this.value=value;
         this.depth=depth;
         this.turn=turn;
         this.pieces=pieces;
-        this.removedPiece=[]
+        this.whitePieces = whitePieces;
+        this.blackPieces = blackPieces;
+        this.removedPiece=[];
 
     }
 
     SuccessorFunction( piece ) {
-        let [ i,j ]=piece.piecePosition;
-        const moves=this.CalculationOfPossibleMoves()
         const PossibleMoves=[];
         const PossibleState=[];
-        for( const move of moves[ pieceName ] )
+        for( const move of [...piece.attackMove , ...piece.normalMove] )
         {
+            let[i,j] = piece.piecePosition;
             let newState=JSON.parse( JSON.stringify( this.value ) );
             let tmp=newState[ i ][ j ];
             newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
             newState[ i ][ j ]=""
-            newPiecesPosition[ pieceName ]=move
-            PossibleMoves.push( move );
-            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPiecesPosition ) )
+            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,this.pieces,this.blackPieces,this.whitePieces ) )
         }
-        return [ PossibleMoves,PossibleState ];
+        return PossibleState;
     }
 
     CalculationOfPossibleMoves() {
@@ -43,17 +42,8 @@ class State {
             piece.Calculate_allMoves( board );
             piece.Calculate_normalMove( board );
             piece.Calculate_attackMove( board );
-
         }
 
-
-        // function isWithinBoard( move ) {
-        //     return ( 0<=move[ 0 ]&&move[ 0 ]<8 )&&( 0<=move[ 1 ]&&move[ 1 ]<8 );
-        // }
-
-        // function is_blocked( board,move ) {
-        //     return board[ move[ 0 ] ][ move[ 1 ] ]!="";
-        // }
 
 
         // function is_SoldierMove( piece,board,move ) {
@@ -83,68 +73,50 @@ class State {
         //     }
         // }
 
-        // const board=this.value;
-        // function validMoves( PossibleMoves ) {
-        //     const PossibleValidMoves={}
-        //     console.log( PossibleMoves )
-        //     for( const piece in PossibleMoves )
-        //     {
-        //         PossibleValidMoves[ piece ]=[]
-        //         const moves=PossibleMoves[ piece ];
-        //         for( const move of moves )
-        //         {
-        //             if( isWithinBoard( move ) )
-        //             {
-        //                 if( is_blocked( board,move ) )
-        //                 {
-        //                     if( is_opponent( board,move ) )
-        //                     {
-        //                         PossibleValidMoves[ piece ].push( move )
-        //                     }
-        //                     else
-        //                     {
-        //                         break
-        //                     }
-        //                 }
-        //                 else if( !is_SoldierMove( piece,board,move ) )
-        //                 {
-        //                     continue
-        //                 }
-        //                 else
-        //                 {
-        //                     PossibleValidMoves[ piece ].push( move );
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     return PossibleValidMoves
-        // }
 
 
-        // const PossibleValidMoves=validMoves( PossibleMoves );
 
-        // return PossibleValidMoves;
     }
 }
 
 
 
 class GameTree {
-    constructor ( startState,max_depth,pieces ) {
+    constructor ( startState,max_depth,pieces,blackPieces ,whitePieces) {
         this.startState=startState;
         this.max_depth=max_depth;
-        this.currentState=new State( null,startState,0,0,pieces );
+        this.currentState=new State( null,startState,0,0,pieces ,blackPieces,whitePieces);
         this.list=[]
         this.list.push( this.currentState )
         this.updateGame( this.startState )
     }
 
-    player( piece,move ) {
-        let [ PossibleMoves,PossibleState ]=this.currentState.SuccessorFunction( piece );
-        // console.log(PossibleState[1].value)
-        this.currentState=PossibleState[ move ]
-        this.updateGame( this.currentState.value )
+    player() {
+        let piece = ''
+        if(this.currentState.turn == 0){
+            while (true){
+                let number = Math.floor(Math.random()*this.currentState.whitePieces.length);
+                piece = this.currentState.whitePieces[number]
+                if([...piece.attackMove , ...piece.normalMove].length != 0){
+                    break
+                }
+            }
+        }
+        else if(this.currentState.turn == 1){
+            while (true){
+                let number = Math.floor(Math.random()*this.currentState.blackPieces.length);
+                piece = this.currentState.blackPieces[number]
+                if([...piece.attackMove , ...piece.normalMove].length != 0){
+                    break
+                }
+            }
+        }
 
+        
+        let PossibleMoves = this.currentState.SuccessorFunction(piece);
+        let number = Math.floor(Math.random()*PossibleMoves.length);
+        this.currentState = PossibleMoves[number]
+        this.updateGame(this.currentState.value)
     }
 
     updateGame( state ) {
@@ -187,10 +159,8 @@ class Piece {
         this.allMoves=this.pieceMoves( ... this.piecePosition );
         this.normalMove=[]
         this.attackMove=[];
-        this.attacker = [];
-        this.Threatened_by=[];
     }
-    
+
     Calculate_allMoves( board ) {
         this.allMoves=this.allMoves.filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
@@ -199,25 +169,44 @@ class Piece {
 
 
     Calculate_normalMove( board ) {
-        this.normalMove=this.allMoves.filter( move =>
-            board[move[0]][move[1]] == ''
-        );
+        for(let move of this.allMoves){
+            if(board[ move[ 0 ] ][ move[ 1 ] ]==''){
+                this.normalMove.push(move)
+            }
+            else{
+                break
+            }
+        }
     }
 
     Calculate_attackMove( board ) {
-        this.attackMove=this.allMoves.filter( move =>
-            board[move[0]][move[1]] != '' && (board[move[0]][move[1]].color == this.opponentColor)
-        );
+        for(let move of this.allMoves){
+            if(( board[ move[ 0 ] ][ move[ 1 ] ]!='')  && ( board[ move[ 0 ] ][ move[ 1 ] ].color==this.opponentColor)){
+                this.attackMove.push(move)
+            }
+            else{
+                break
+            }
+        }
     }
-    Calculate_treats( board ) {}
+
+
 }
 
 
-const [ startState,pieces ]=createStartBoard();
-let game=new GameTree( startState,100,pieces );
+const [ startState,pieces,blackPieces,whitePieces ]=createStartBoard();
+let game=new GameTree( startState,100,pieces,blackPieces,whitePieces );
 game.currentState.CalculationOfPossibleMoves()
-console.log( game.currentState.value )
 
+document.body.addEventListener("mousedown",()=>game.player())
+
+// console.log(game.currentState.whitePieces)
+
+// for(let piece of game.currentState.pieces){
+// console.log(piece.attackMove)
+//     console.log(piece.normalMove)
+
+// }
 
 
 // game.player( "whiteSoldier1",1 )

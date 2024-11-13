@@ -40,6 +40,8 @@ function createStartBoard() {
     };
 
     let pieces=[];
+    let whitePieces = [];
+    let blackPieces = [];
     for( let row=0;row<startState.length;row++ )
     {
         for( let Column=0;Column<startState[ row ].length;Column++ )
@@ -51,9 +53,16 @@ function createStartBoard() {
                 let pieceType=Object.keys( allMoves ).find( key => pieceName.toLowerCase().includes( key.toLowerCase() ) );
                 let piece=new Piece( pieceName,[ row,Column ],allMoves[ pieceType ] ,pieceColor)
                 pieces.push( piece )
+
+                if(piece.color == "white"){
+                    whitePieces.push(piece)
+                }
+                else if(piece.color == "black"){
+                    blackPieces.push(piece)
+                }
                 startState[ row ][ Column ]=piece;
             }
         }
     }
-    return [ startState,pieces ];
+    return [ startState,pieces,blackPieces,whitePieces ];
 }
