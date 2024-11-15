@@ -19,11 +19,14 @@ class State {
         for( const move of moves )
         {
             let [ i,j ]=piece.piecePosition;
-            let newState=JSON.parse( JSON.stringify( this.value ) );
+            let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
+
+
+            let [ newState,newPieces,newBlackPieces,newWhitePieces ]=createBoardAndPieces( board )
             let tmp=newState[ i ][ j ];
             newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
             newState[ i ][ j ]=""
-            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,this.pieces,this.blackPieces,this.whitePieces ) )
+            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces ) )
         }
         return PossibleState;
     }
@@ -83,7 +86,6 @@ class State {
 }
 
 
-
 class GameTree {
     constructor ( startState,max_depth,pieces,blackPieces,whitePieces ) {
         this.startState=startState;
@@ -121,8 +123,8 @@ class GameTree {
                 }
             }
         }
-        
-        console.log(piece)
+        console.log(piece.allMoves, piece.pieceID,piece.piecePosition,piece.normalMove,piece.ownReach )
+
         let PossibleMoves=this.currentState.SuccessorFunction( piece );
         let number=Math.floor( Math.random()*PossibleMoves.length );
         this.currentState=PossibleMoves[ number ]
@@ -170,12 +172,12 @@ class Piece {
         this.allMoves=[]
         this.normalMove=[]
         this.attackMove=[];
-        this.ownReach = [];
-        this.opponentReach = [];
+        this.ownReach=[];
+        this.opponentReach=[];
     }
 
     Calculate_allMoves( board ) {
-        let moves= this.pieceMoves( ... this.piecePosition ).filter( move =>
+        let moves=this.pieceMoves( ... this.piecePosition ).filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
         );
         let steps={0: {},1: {},2: {},3: {},4: {},5: {},6: {},7: {}}
@@ -192,11 +194,11 @@ class Piece {
             {
                 if( DisplacementX*DisplacementY>0 )
                 {
-                    if( DisplacementX> 0 && DisplacementY >0 )
+                    if( DisplacementX>0&&DisplacementY>0 )
                     {
                         steps[ 0 ][ absDisplacementX+absDisplacementY ]=move;
                     }
-                    else if( DisplacementX< 0 && DisplacementY < 0 )
+                    else if( DisplacementX<0&&DisplacementY<0 )
                     {
                         steps[ 1 ][ absDisplacementX+absDisplacementY ]=move;
                     }
@@ -204,11 +206,11 @@ class Piece {
                 }
                 else if( DisplacementX*DisplacementY<0 )
                 {
-                    if(DisplacementX> 0 && DisplacementY < 0  )
+                    if( DisplacementX>0&&DisplacementY<0 )
                     {
                         steps[ 2 ][ absDisplacementX+absDisplacementY ]=move;
                     }
-                    else if(DisplacementX< 0 && DisplacementY > 0  )
+                    else if( DisplacementX<0&&DisplacementY>0 )
                     {
                         steps[ 3 ][ absDisplacementX+absDisplacementY ]=move;
                     }
@@ -240,35 +242,42 @@ class Piece {
             }
 
         }
-        this.allMoves = steps
-        
+        this.allMoves=steps
+
 
     }
 
 
     Calculate_normalMove( board ) {
-        this.normalMove = []
-        this.ownReach = []
-        this.opponentReach = []
+        this.normalMove=[]
+        this.ownReach=[]
+        this.opponentReach=[]
         for( let direction in this.allMoves )
         {
-            for(let step in this.allMoves[direction]){
-                let move = this.allMoves[direction][step]
-                let [moveX,moveY] = move; 
-                if(board[moveX][moveY] != ''){
-                    let piece = board[moveX][moveY] 
+            for( let step in this.allMoves[ direction ] )
+            {
+                let move=this.allMoves[ direction ][ step ]
+                let [ moveX,moveY ]=move;
+                if( board[ moveX ][ moveY ]!='' )
+                {
+                    let piece=board[ moveX ][ moveY ]
                     // console.log(piece)
-                    if(piece.color == this.color){
+                    if( piece.color==this.color )
+                    {
                         break
                     }
-                    else if(piece.color == this.opponentColor){
-                        this.ownReach.push(piece)
-                        piece.opponentReach.push(this)
+                    else if( piece.color==this.opponentColor )
+                    {
+                        // this.ownReach.push(piece)  ------>
+                        // piece.opponentReach.push(this)--->/*TypeError: cyclic object value*/
+                        this.ownReach.push( piece.pieceID )
+                        piece.opponentReach.push( this.pieceID )
                         break
                     }
                 }
-                else if(board[moveX][moveY] == ''){
-                    this.normalMove.push(move)
+                else if( board[ moveX ][ moveY ]=='' )
+                {
+                    this.normalMove.push( move )
                 }
             }
         }
@@ -286,19 +295,7 @@ class Piece {
         }
     }
     Calculate_SoldierAttackMove( board,piece ) {
-
-        let whiteSoldierAttack=( i,j ) => [ [ i-1,j-1 ],[ i-1,j+1 ] ]
-        let blackSoldierAttack=( i,j ) => [ [ i+1,j+1 ],[ i+1,j-1 ] ]
-
-
-        if( this.pieceID.includes( "white" ) )
-        {
-            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( whiteSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
-        }
-        else if( piece.pieceID.includes( "black" ) )
-        {
-            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( blackSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
-        }
+        // for(move )
     }
 
     is_InBoard( moves ) {
@@ -318,13 +315,89 @@ class Piece {
 }
 
 
+let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blackKing","blackBishop2","blackKnight2","blackRock2" ],
+[ "blackSoldier1","blackSoldier2","blackSoldier3","blackSoldier4","blackSoldier5","blackSoldier6","blackSoldier7","blackSoldier8" ],
+[ "","","","","","","","" ],
+[ "","","","","","","","" ],
+[ "","","","","","","","" ],
+[ "","","","","","","","" ],
+[ "whiteSoldier1","whiteSoldier2","whiteSoldier3","whiteSoldier4","whiteSoldier5","whiteSoldier6","whiteSoldier7","whiteSoldier8" ],
+[ "whiteRock1","whiteKnight1","whiteBishop1","whiteKing","whiteQueen","whiteBishop2","whiteKnight2","whiteRock2" ],];
 
-const [ startState,pieces,blackPieces,whitePieces ]=createStartBoard();
-let game=new GameTree( startState,100,pieces,blackPieces,whitePieces );
+function createBoardAndPieces( state ) {
+    const allMoves={
+        "whiteSoldier": ( i,j ) => [ [ i-1,j ],[ i-2,j ],[  i-1,j-1 ],[ i-1,j+1 ]  ],
+        "blackSoldier": ( i,j ) => [ [ i+1,j ],[ i+2,j ],[  i+1,j+1 ],[ i+1,j-1 ]  ],
+        "rock": ( i,j ) => {
+            const positions=[];
+            for( let x=1;x<8;x++ )
+            {
+                positions.push( [ i+x,j ],[ i-x,j ],[ i,j+x ],[ i,j-x ] );
+            }
+            return positions;
+        },
+        "bishop": ( i,j ) => {
+            const positions=[];
+            for( let x=1;x<8;x++ )
+            {
+                positions.push( [ i+x,j+x ],[ i-x,j-x ],[ i+x,j-x ],[ i-x,j+x ] );
+            }
+            return positions;
+        },
+        "knight": ( i,j ) => [
+            [ i+2,j+1 ],[ i+2,j-1 ],[ i-2,j+1 ],[ i-2,j-1 ],
+            [ i+1,j+2 ],[ i+1,j-2 ],[ i-1,j+2 ],[ i-1,j-2 ]
+        ],
+        "queen": ( i,j ) => [ ...allMoves.rock( i,j ),...allMoves.bishop( i,j ) ],
+        "king": ( i,j ) => [
+            [ i+1,j ],[ i-1,j ],[ i,j+1 ],[ i,j-1 ],
+            [ i+1,j+1 ],[ i-1,j-1 ],[ i+1,j-1 ],[ i-1,j+1 ]
+        ]
+    };
+
+    let pieces=[];
+    let whitePieces=[];
+    let blackPieces=[];
+    let SoldierPiece=[]
+    for( let row=0;row<state.length;row++ )
+    {
+        for( let Column=0;Column<state[ row ].length;Column++ )
+        {
+            let pieceName=state[ row ][ Column ]
+            if( pieceName!='' )
+            {
+                let pieceColor=pieceName.includes( "black" )? "black":"white";
+                let pieceType=Object.keys( allMoves ).find( key => pieceName.toLowerCase().includes( key.toLowerCase() ) );
+
+                let piece=new Piece( pieceName,[ row,Column ],allMoves[ pieceType ],pieceColor,pieceType )
+                pieces.push( piece )
+
+                if( piece.color=="white" )
+                {
+                    whitePieces.push( piece )
+                }
+                else if( piece.color=="black" )
+                {
+                    blackPieces.push( piece )
+                }
+                state[ row ][ Column ]=piece;
+
+            }
+        }
+    }
+
+    return [ state,pieces,blackPieces,whitePieces ];
+}
+
+
+
+const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startState );
+
+let game=new GameTree( StartState,100,pieces,blackPieces,whitePieces );
 // game.currentState.CalculationOfPossibleMoves()
 
 document.body.addEventListener( "mousedown",() => game.player() )
-console.log( game.currentState.value )
+// console.log( game.currentState.value )
 
 // console.log(game.currentState.whitePieces)
 
