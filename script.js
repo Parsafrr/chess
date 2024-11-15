@@ -43,8 +43,7 @@ class State {
         {
             piece.Calculate_allMoves( board );
             piece.Calculate_normalMove( board );
-            piece.Calculate_attackMove( board );
-            piece.canMove( board )
+            // piece.Calculate_attackMove( board );
 
         }
 
@@ -97,6 +96,7 @@ class GameTree {
 
     player() {
         let piece=''
+        this.currentState.CalculationOfPossibleMoves();
         if( this.currentState.turn==0 )
         {
             while( true )
@@ -121,8 +121,8 @@ class GameTree {
                 }
             }
         }
-
-
+        
+        console.log(piece)
         let PossibleMoves=this.currentState.SuccessorFunction( piece );
         let number=Math.floor( Math.random()*PossibleMoves.length );
         this.currentState=PossibleMoves[ number ]
@@ -167,73 +167,17 @@ class Piece {
         this.pieceMoves=pieceMoves;
         this.pieceType=pieceType;
         this.opponentColor=this.color==="black"? "white":"black";
-        this.allMoves=this.pieceMoves( ... this.piecePosition );
+        this.allMoves=[]
         this.normalMove=[]
         this.attackMove=[];
+        this.ownReach = [];
+        this.opponentReach = [];
     }
 
     Calculate_allMoves( board ) {
-        this.allMoves=this.allMoves.filter( move =>
+        let moves= this.pieceMoves( ... this.piecePosition ).filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
         );
-    }
-
-
-    Calculate_normalMove( board ) {
-        for( let move of this.allMoves )
-        {
-            if( board[ move[ 0 ] ][ move[ 1 ] ]=='' )
-            {
-                this.normalMove.push( move )
-            }
-            else
-            {
-                continue
-            }
-        }
-    }
-
-    Calculate_attackMove( board ) {
-        if( this.pieceType.includes( "Soldier" ) )
-        {
-            this.Calculate_SoldierAttackMove( board,this )
-        }
-        else
-        {
-            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.allMoves )
-        }
-    }
-    Calculate_SoldierAttackMove( board,piece ) {
-
-        let whiteSoldierAttack=( i,j ) => [ [ i-1,j-1 ],[ i-1,j+1 ] ]
-        let blackSoldierAttack=( i,j ) => [ [ i+1,j+1 ],[ i+1,j-1 ] ]
-
-
-        if( this.pieceID.includes( "white" ) )
-        {
-            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( whiteSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
-        }
-        else if( piece.pieceID.includes( "black" ) )
-        {
-            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( blackSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
-        }
-    }
-
-    is_InBoard( moves ) {
-        moves=moves.filter( move =>
-            move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
-        );
-        return moves
-    }
-
-    is_opponentInPosition( board,opponentColor,moves ) {
-        moves=moves.filter( move =>
-            board[ move[ 0 ] ][ move[ 1 ] ]!=''&&board[ move[ 0 ] ][ move[ 1 ] ].color==opponentColor
-        );
-        return moves
-    }
-    canMove( board ) {
-        let moves=this.allMoves
         let steps={0: {},1: {},2: {},3: {},4: {},5: {},6: {},7: {}}
         for( let move of moves )
         {
@@ -296,30 +240,91 @@ class Piece {
             }
 
         }
-        console.log( this.pieceID,steps )
-        // for( let step in steps )
-        // {
-        //     let [ i,j ]=steps[ step ]
-        //     if( board[ i ][ j ]!='' )
-        //     {
-        //         console.log( steps[ step ] )
-        //     }
-
-        // }
-        // let firstObstacle
-        // console.log(firstObstacle)
+        this.allMoves = steps
+        
 
     }
+
+
+    Calculate_normalMove( board ) {
+        this.normalMove = []
+        this.ownReach = []
+        this.opponentReach = []
+        for( let direction in this.allMoves )
+        {
+            for(let step in this.allMoves[direction]){
+                let move = this.allMoves[direction][step]
+                let [moveX,moveY] = move; 
+                if(board[moveX][moveY] != ''){
+                    let piece = board[moveX][moveY] 
+                    // console.log(piece)
+                    if(piece.color == this.color){
+                        break
+                    }
+                    else if(piece.color == this.opponentColor){
+                        this.ownReach.push(piece)
+                        piece.opponentReach.push(this)
+                        break
+                    }
+                }
+                else if(board[moveX][moveY] == ''){
+                    this.normalMove.push(move)
+                }
+            }
+        }
+        // console.log(this.ownReach)
+    }
+
+    Calculate_attackMove( board ) {
+        if( this.pieceType.includes( "Soldier" ) )
+        {
+            this.Calculate_SoldierAttackMove( board,this )
+        }
+        else
+        {
+            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.allMoves )
+        }
+    }
+    Calculate_SoldierAttackMove( board,piece ) {
+
+        let whiteSoldierAttack=( i,j ) => [ [ i-1,j-1 ],[ i-1,j+1 ] ]
+        let blackSoldierAttack=( i,j ) => [ [ i+1,j+1 ],[ i+1,j-1 ] ]
+
+
+        if( this.pieceID.includes( "white" ) )
+        {
+            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( whiteSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
+        }
+        else if( piece.pieceID.includes( "black" ) )
+        {
+            this.attackMove=this.is_opponentInPosition( board,this.opponentColor,this.is_InBoard( blackSoldierAttack( piece.piecePosition[ 0 ],piece.piecePosition[ 1 ] ) ) )
+        }
+    }
+
+    is_InBoard( moves ) {
+        moves=moves.filter( move =>
+            move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
+        );
+        return moves
+    }
+
+    is_opponentInPosition( board,opponentColor,moves ) {
+        moves=moves.filter( move =>
+            board[ move[ 0 ] ][ move[ 1 ] ]!=''&&board[ move[ 0 ] ][ move[ 1 ] ].color==opponentColor
+        );
+        return moves
+    }
+
 }
 
 
 
 const [ startState,pieces,blackPieces,whitePieces ]=createStartBoard();
 let game=new GameTree( startState,100,pieces,blackPieces,whitePieces );
-game.currentState.CalculationOfPossibleMoves()
+// game.currentState.CalculationOfPossibleMoves()
 
 document.body.addEventListener( "mousedown",() => game.player() )
-console.log( game.currentState.pieces )
+console.log( game.currentState.value )
 
 // console.log(game.currentState.whitePieces)
 
