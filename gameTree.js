@@ -38,11 +38,13 @@ export class GameTree {
                 }
             }
         }
-        // console.log( piece.allMoves,piece.pieceID,piece.piecePosition,piece.normalMove,piece.ownReach )
-
         let PossibleMoves=this.currentState.SuccessorFunction( piece );
         let number=Math.floor( Math.random()*PossibleMoves.length );
         this.currentState=PossibleMoves[ number ]
+
+        console.log( piece)
+        console.log(this.currentState)
+
         // console.log( this.currentState,this.currentState.pieces.length )
         this.updateGame( this.currentState.value )
     }

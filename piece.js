@@ -89,38 +89,44 @@ export class Piece {
         if( this.pieceType.includes( "Soldier" ) )
         {
             this.Calculate_SoldierMove( board )
-            return
         }
 
-        for( let direction in this.allMoves )
+        else
         {
-            for( let step in this.allMoves[ direction ] )
+            for( let direction in this.allMoves )
             {
-                let move=this.allMoves[ direction ][ step ]
-                let [ moveX,moveY ]=move;
-                if( board[ moveX ][ moveY ]!='' )
+                for( let step in this.allMoves[ direction ] )
                 {
-                    let piece=board[ moveX ][ moveY ]
-                    // console.log(piece)
-                    if( piece.color==this.color )
+                    let move=this.allMoves[ direction ][ step ]
+                    let [ moveX,moveY ]=move;
+                    if( board[ moveX ][ moveY ]!='' )
                     {
-                        break
+                        let piece=board[ moveX ][ moveY ]
+                        if( piece.color==this.color )
+                        {
+                            break
+                        }
+                        else if( piece.color==this.opponentColor )
+                        {
+                            // this.ownReach.push(piece)  ------>
+                            // piece.opponentReach.push(this)--->/*TypeError: cyclic object value*/
+                            this.ownReach.push( piece.pieceID )
+                            piece.opponentReach.push( this.pieceID )
+                            break
+                        }
                     }
-                    else if( piece.color==this.opponentColor )
+                    else if( board[ moveX ][ moveY ]=='' )
                     {
-                        // this.ownReach.push(piece)  ------>
-                        // piece.opponentReach.push(this)--->/*TypeError: cyclic object value*/
-                        this.ownReach.push( piece.pieceID )
-                        piece.opponentReach.push( this.pieceID )
-                        break
+                        this.normalMove.push( move )
                     }
-                }
-                else if( board[ moveX ][ moveY ]=='' )
-                {
-                    this.normalMove.push( move )
                 }
             }
+            if( this.pieceType=="king" )
+            {
+                this.filterKingMove( board );
+            }
         }
+
     }
 
     Calculate_attackMove( board ) {
@@ -148,6 +154,8 @@ export class Piece {
                         let piece=board[ moveX ][ moveY ]
                         if( piece.color==this.opponentColor&&piece.pieceType!="king" )
                         {
+                            this.ownReach.push( piece.pieceID )
+                            piece.opponentReach.push( this.pieceID )
                             this.attackMove.push( move )
                             break
                         }
@@ -169,8 +177,6 @@ export class Piece {
                         }
                         else if( piece.color==this.opponentColor )
                         {
-                            this.ownReach.push( piece.pieceID )
-                            piece.opponentReach.push( this.pieceID )
                             break
                         }
                     }
@@ -191,6 +197,50 @@ export class Piece {
         return moves
     }
 
+    filterKingMove( board ) {
+        let validMoves=[]; // Temporary array to store valid moves
+
+        for( let move of this.normalMove )
+        {
+            let [ x,y ]=move;
+
+            // All neighboring squares of the potential move
+            let surroundingSquares=[
+                [ x+1,y+1 ],[ x+1,y-1 ],[ x-1,y+1 ],[ x-1,y-1 ],
+                [ x+1,y ],[ x,y+1 ],[ x-1,y ],[ x,y-1 ]
+            ];
+
+            let isValid=true; // Assume the move is valid initially
+
+            for( let neighbor of surroundingSquares )
+            {
+                let [ nx,ny ]=neighbor;
+
+                // Check if the neighbor is within the board
+                if( nx>=0&&nx<=7&&ny>=0&&ny<=7 )
+                {
+                    let piece=board[ nx ][ ny ];
+
+                    // If there's an opponent king in the neighboring square, invalidate the move
+                    if( piece!==""&&piece.pieceType==="king"&&piece.color===this.opponentColor )
+                    {
+                        isValid=false;
+                        break;
+                    }
+                }
+            }
+
+            // Add the move to validMoves if it's valid
+            if( isValid )
+            {
+                validMoves.push( move );
+            }
+        }
+
+        // Replace the original normalMove with the filtered validMoves
+        this.normalMove=validMoves;
+    }
+
     is_opponentInPosition( board,opponentColor,moves ) {
         for( let direction in this.allMoves )
         {
@@ -201,9 +251,10 @@ export class Piece {
                 if( board[ moveX ][ moveY ]!='' )
                 {
                     let piece=board[ moveX ][ moveY ]
-                    if( piece.color==this.opponentColor&&piece.pieceType!="king" )
+                    if( piece.color==this.color ) {break}
+                    else if( piece.color==this.opponentColor&&piece.pieceType!="king" )
                     {
-                        console.log( "d" )
+
                         this.attackMove.push( move )
                         break
                     }
@@ -212,5 +263,6 @@ export class Piece {
         }
 
     }
+
 
 }

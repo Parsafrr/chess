@@ -1,7 +1,7 @@
-import { createBoardAndPieces } from "/createBoard.js";
-import { State } from "/state.js";
-import { GameTree } from "/gameTree.js";
-import { Piece } from "/piece.js";
+import {createBoardAndPieces} from "/createBoard.js";
+import {State} from "/state.js";
+import {GameTree} from "/gameTree.js";
+import {Piece} from "/piece.js";
 
 
 
@@ -24,8 +24,19 @@ const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startS
 
 let game=new GameTree( StartState,100,pieces,blackPieces,whitePieces );
 // game.currentState.CalculationOfPossibleMoves()
+// document.body.addEventListener( "mousemove",( e ) => game.player())
 
-document.body.addEventListener( "mousemove",() => game.player() )
+document.body.addEventListener( "keydown",( e ) => {
+    if( e.key=="ArrowLeft" )
+    {
+        game.updateGame(game.currentState.parent.value)
+    }
+    else if( e.key=="ArrowRight" )
+    {
+        game.player()
+    }
+}
+);
 // console.log( game.currentState.value )
 
 // console.log(game.currentState.whitePieces)

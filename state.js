@@ -1,4 +1,4 @@
-import { createBoardAndPieces } from "/createBoard.js";
+import {createBoardAndPieces} from "/createBoard.js";
 
 export class State {
     constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces=[] ) {
@@ -25,7 +25,7 @@ export class State {
             let [ i,j ]=piece.piecePosition;
             let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
 
-
+            
             let [ newState,newPieces,newBlackPieces,newWhitePieces ]=createBoardAndPieces( board )
             let tmp=newState[ i ][ j ];
             newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
@@ -39,10 +39,7 @@ export class State {
             {
                 let opponentPiece=this.value[ move[ 0 ] ][ move[ 1 ] ]
                 this.removedPieces.push( opponentPiece )
-                if( opponentPiece.pieceType=="king" )
-                {
-                    // console.log( ( this.removedPieces,piece ) )
-                }
+                // this.pieces.po
             }
             let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
 
@@ -72,41 +69,6 @@ export class State {
             piece.Calculate_allMoves( board );
             piece.Calculate_normalMove( board );
             piece.Calculate_attackMove( board );
-            // piece.Calculate_SoldierMove( board );
-
         }
-
-
-
-        // function is_SoldierMove( piece,board,move ) {
-        //     if( piece.includes( "Soldier" ) )
-        //     {
-
-        //         if( Math.abs( move[ 1 ]-piecesPosition[ piece ][ 1 ] )>=1 )
-        //         {
-        //             const OpponentPieceColor=opponent( board,move )
-        //             if( board[ move[ 0 ] ][ move[ 1 ] ].includes( OpponentPieceColor ) )
-        //             {
-        //                 return true
-        //             }
-        //             else
-        //             {
-        //                 return false
-        //             }
-        //         }
-        //         else
-        //         {
-        //             return true
-        //         }
-        //     }
-        //     else
-        //     {
-        //         return true
-        //     }
-        // }
-
-
-
-
     }
 }
