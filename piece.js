@@ -17,6 +17,13 @@ export class Piece {
         let moves=this.pieceMoves( ... this.piecePosition ).filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
         );
+        this.allMoves = [];
+        this.normalMove = [];
+        this.attackMove = [];
+        this.ownReach = [];
+        this.opponentReach=[];
+
+
         let steps={0: {},1: {},2: {},3: {},4: {},5: {},6: {},7: {}}
         for( let move of moves )
         {

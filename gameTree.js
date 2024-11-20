@@ -9,86 +9,62 @@ export class GameTree {
         this.list=[]
         this.list.push( this.currentState )
         this.updateGame( this.startState )
-        this.scores = {"soldier":1,"knight":3,"bishop":3,"rock":5,"queen":9}
+        this.scores={"soldier": -1,"knight": -3,"bishop": -3,"rock": -5,"queen": -9}
     }
 
-    evaluation_function1(){
-        this.player()
-        let pieces = []
-        if(this.currentState.turn == 0){
-            pieces = this.currentState.whitePieces; 
+    evaluation_function1(state) {
+        let score=0;
+        let removedPieces=state.removedPieces[ state.turnColor ]
+        for( let piece of removedPieces )
+        {
+            let pieceType=piece.pieceType
+            if( pieceType.toLowerCase().includes( "soldier" ) )
+            {
+                pieceType="soldier"
+            }
+            score+=this.scores[ pieceType.toLowerCase() ]
         }
-        else if(this.currentState.turn == 1){
-            pieces = this.currentState.blackPieces; 
-        }
-        let score = 0;
-        let removedPieces = this.currentState.removedPieces[this.currentState.turnColor]
-        for(let piece of removedPieces){
-            score+=this.scores[piece.pieceType.toLowerCase()]
-        }
-        console.log(removedPieces,score)
+        return score
     }
 
-    minimax(){}
+    minimax() {
+        let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
+        let PossibleMoves = []
+        for(let piece of pieces)
+            PossibleMoves.push(...this.currentState.SuccessorFunction(piece));
+        let optimalScore= -1000;
+        let optimalMove 
+        for(let newState of PossibleMoves){
+            let score =  this.evaluation_function1(newState)
+            if(score > optimalScore){
+                console.log(score)
+                optimalScore = score;
+                optimalMove = newState;
+            }   
+        }
+        this.currentState = optimalMove;
+        this.updateGame( this.currentState.value )
 
-    Alpha_beta_pruning(){}
+        
+    }
+
+    Alpha_beta_pruning() {}
 
 
     player() {
-        let piece=''
-        this.currentState.CalculationOfPossibleMoves();
-        if( this.currentState.turn==0 )
+        this.minimax();
+        let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
+        let PossibleMoves = []
+        while( true )
         {
-            while( true )
-            {
-                let number=Math.floor( Math.random()*this.currentState.whitePieces.length );
-                piece=this.currentState.whitePieces[ number ]
-                if( [ ...piece.attackMove,...piece.normalMove ].length!=0 )
-                {
-                    break
-                }
-            }
+            let piece=pieces[ Math.floor( Math.random()*pieces.length ) ]
+            PossibleMoves=this.currentState.SuccessorFunction( piece );
+            if(PossibleMoves.length != 0){break}
         }
-        else if( this.currentState.turn==1 )
-        {
-            while( true )
-            {
-                let number=Math.floor( Math.random()*this.currentState.blackPieces.length );
-                piece=this.currentState.blackPieces[ number ]
-                if( [ ...piece.attackMove,...piece.normalMove ].length!=0 )
-                {
-                    break
-                }
-            }
-        }
-        let PossibleMoves=this.currentState.SuccessorFunction( piece );
-        let number=Math.floor( Math.random()*PossibleMoves.length );
-        this.currentState=PossibleMoves[ number ]
-
-        // console.log( piece )
-        // console.log( this.currentState ) // important console
-
-        // console.log( this.currentState,this.currentState.pieces.length )
+        this.currentState=PossibleMoves[ Math.floor( Math.random()*PossibleMoves.length ) ]
         this.updateGame( this.currentState.value )
     }
 
-    // player2( id ) {
-    //     if( id!="undefined" )
-    //     {
-    //         let pieces=this.currentState.pieces;
-    //         let piece=pieces.find( piece => piece.pieceID==id )
-    //         let board=this.currentState.value;
-    //         piece.Calculate_allMoves( board );
-    //         piece.Calculate_normalMove( board );
-    //         piece.Calculate_attackMove( board );
-    //         let moves=this.currentState.SuccessorFunction( piece )
-    //         console.log(moves)
-    //         for( let move of moves )
-    //         {
-    //             console.log( move )
-    //         }
-    //     }
-    // }
 
     updateGame( state ) {
         for( let i=0;i<=7;i++ )

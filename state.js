@@ -1,12 +1,12 @@
 import {createBoardAndPieces} from "/createBoard.js";
 
 export class State {
-    constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces={"white":[],"black":[]} ) {
+    constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces={"white": [],"black": []} ) {
         this.parent=parent;
         this.value=value;
         this.depth=depth;
         this.turn=turn;
-        this.turnColor = this.turn === 0 ? "white" : "black";
+        this.turnColor=this.turn===0? "white":"black";
         this.pieces=pieces;
         this.whitePieces=whitePieces;
         this.blackPieces=blackPieces;
@@ -14,40 +14,38 @@ export class State {
     }
 
     SuccessorFunction( piece ) {
+        this.CalculationOfPossibleMoves();
         const PossibleMoves=[];
         const PossibleState=[];
         const normalMoves=[ ...piece.normalMove ]
         const attackMoves=[ ...( piece.attackMove===undefined? []:piece.attackMove ) ]
-
-        // piece.canMove( this.value,moves )
         for( const move of normalMoves )
         {
-            let [ i,j ]=piece.piecePosition;
             let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
 
-            
+            let [ i,j ]=piece.piecePosition;
+            let tmp=board[ i ][ j ];
+            board[ move[ 0 ] ][ move[ 1 ] ]=tmp;
+            board[ i ][ j ]="";
+
             let [ newState,newPieces,newBlackPieces,newWhitePieces ]=createBoardAndPieces( board )
-            let tmp=newState[ i ][ j ];
-            newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
-            newState[ i ][ j ]=""
-            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces ,this.removedPieces) )
+
+            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces,this.removedPieces ) )
         }
         for( const move of attackMoves )
         {
-            let [ i,j ]=piece.piecePosition;
-            if( this.value[ move[ 0 ] ][ move[ 1 ] ]!="" )
-            {
-                let opponentPiece=this.value[ move[ 0 ] ][ move[ 1 ] ]
-                this.removedPieces[opponentPiece.color].push( opponentPiece )
-            }
             let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
 
-
+            let [ i,j ]=piece.piecePosition;
+            let opponentPiece=this.value[ move[ 0 ] ][ move[ 1 ] ]
+            let removedPiece=opponentPiece;
+            let newRemovedPieces=JSON.parse(JSON.stringify(this.removedPieces));;
+            newRemovedPieces[ removedPiece.color ].push( removedPiece );
+            let tmp=board[ i ][ j ];
+            board[ move[ 0 ] ][ move[ 1 ] ]=tmp;
+            board[ i ][ j ]=""
             let [ newState,newPieces,newBlackPieces,newWhitePieces ]=createBoardAndPieces( board )
-            let tmp=newState[ i ][ j ];
-            newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
-            newState[ i ][ j ]=""
-            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces,this.removedPieces ) )
+            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces,newRemovedPieces ) )
         }
         return PossibleState;
     }

@@ -33,7 +33,7 @@ document.body.addEventListener( "keydown",( e ) => {
     }
     else if( e.key=="ArrowRight" )
     {
-        game.evaluation_function1()
+        game.minimax()
     }
 }
 );
