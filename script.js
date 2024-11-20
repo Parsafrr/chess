@@ -22,9 +22,9 @@ let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blac
 
 const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startState );
 
-let game=new GameTree( StartState,100,pieces,blackPieces,whitePieces );
+export let game=new GameTree( StartState,100,pieces,blackPieces,whitePieces );
 // game.currentState.CalculationOfPossibleMoves()
-// document.body.addEventListener( "mousemove",( e ) => game.player())
+// document.body.addEventListener( "mousedown",( e ) => game.evaluation_function1())
 
 document.body.addEventListener( "keydown",( e ) => {
     if( e.key=="ArrowLeft" )
@@ -33,22 +33,7 @@ document.body.addEventListener( "keydown",( e ) => {
     }
     else if( e.key=="ArrowRight" )
     {
-        game.player()
+        game.evaluation_function1()
     }
 }
 );
-// console.log( game.currentState.value )
-
-// console.log(game.currentState.whitePieces)
-
-// for(let piece of game.currentState.pieces){
-// console.log(piece.attackMove)
-//     console.log(piece.normalMove)
-
-// }
-
-
-// game.player( "whiteSoldier1",1 )
-// game.player( "blackSoldier7",0 )
-// console.log( game.currentState.CalculationOfPossibleMoves() )
-

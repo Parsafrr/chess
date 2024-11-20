@@ -1,4 +1,4 @@
-import { State } from "/state.js";
+import {State} from "/state.js";
 
 
 export class GameTree {
@@ -9,7 +9,30 @@ export class GameTree {
         this.list=[]
         this.list.push( this.currentState )
         this.updateGame( this.startState )
+        this.scores = {"soldier":1,"knight":3,"bishop":3,"rock":5,"queen":9}
     }
+
+    evaluation_function1(){
+        this.player()
+        let pieces = []
+        if(this.currentState.turn == 0){
+            pieces = this.currentState.whitePieces; 
+        }
+        else if(this.currentState.turn == 1){
+            pieces = this.currentState.blackPieces; 
+        }
+        let score = 0;
+        let removedPieces = this.currentState.removedPieces[this.currentState.turnColor]
+        for(let piece of removedPieces){
+            score+=this.scores[piece.pieceType.toLowerCase()]
+        }
+        console.log(removedPieces,score)
+    }
+
+    minimax(){}
+
+    Alpha_beta_pruning(){}
+
 
     player() {
         let piece=''
@@ -42,12 +65,30 @@ export class GameTree {
         let number=Math.floor( Math.random()*PossibleMoves.length );
         this.currentState=PossibleMoves[ number ]
 
-        console.log( piece)
-        console.log(this.currentState)
+        // console.log( piece )
+        // console.log( this.currentState ) // important console
 
         // console.log( this.currentState,this.currentState.pieces.length )
         this.updateGame( this.currentState.value )
     }
+
+    // player2( id ) {
+    //     if( id!="undefined" )
+    //     {
+    //         let pieces=this.currentState.pieces;
+    //         let piece=pieces.find( piece => piece.pieceID==id )
+    //         let board=this.currentState.value;
+    //         piece.Calculate_allMoves( board );
+    //         piece.Calculate_normalMove( board );
+    //         piece.Calculate_attackMove( board );
+    //         let moves=this.currentState.SuccessorFunction( piece )
+    //         console.log(moves)
+    //         for( let move of moves )
+    //         {
+    //             console.log( move )
+    //         }
+    //     }
+    // }
 
     updateGame( state ) {
         for( let i=0;i<=7;i++ )
@@ -56,7 +97,7 @@ export class GameTree {
             {
                 const piece=state[ i ][ j ]
                 const div=document.createElement( "div" );
-                div.id=piece;
+                div.id=piece.pieceID;
                 if( piece!='' )
                 {
                     const image=document.createElement( "img" );

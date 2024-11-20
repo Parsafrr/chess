@@ -182,7 +182,19 @@ export class Piece {
                     }
                     else if( board[ moveX ][ moveY ]=='' )
                     {
-                        this.normalMove.push( move )
+                        if(this.color =="black" && this.piecePosition[0] !=1){   /*Preventing double pawn moves after the first move */
+                            this.normalMove.push( move )
+                            break
+                        }
+                        else if(this.color =="white" && this.piecePosition[0] !=6){
+                            this.normalMove.push( move )
+                            break
+                        }
+                        else{
+                            this.normalMove.push( move )
+                        }
+
+
                     }
                 }
             }

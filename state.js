@@ -1,16 +1,16 @@
 import {createBoardAndPieces} from "/createBoard.js";
 
 export class State {
-    constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces=[] ) {
+    constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces={"white":[],"black":[]} ) {
         this.parent=parent;
         this.value=value;
         this.depth=depth;
         this.turn=turn;
+        this.turnColor = this.turn === 0 ? "white" : "black";
         this.pieces=pieces;
         this.whitePieces=whitePieces;
         this.blackPieces=blackPieces;
         this.removedPieces=removedPieces;
-
     }
 
     SuccessorFunction( piece ) {
@@ -30,7 +30,7 @@ export class State {
             let tmp=newState[ i ][ j ];
             newState[ move[ 0 ] ][ move[ 1 ] ]=tmp;
             newState[ i ][ j ]=""
-            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces ) )
+            PossibleState.push( new State( this,newState,this.depth+1,( this.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces ,this.removedPieces) )
         }
         for( const move of attackMoves )
         {
@@ -38,8 +38,7 @@ export class State {
             if( this.value[ move[ 0 ] ][ move[ 1 ] ]!="" )
             {
                 let opponentPiece=this.value[ move[ 0 ] ][ move[ 1 ] ]
-                this.removedPieces.push( opponentPiece )
-                // this.pieces.po
+                this.removedPieces[opponentPiece.color].push( opponentPiece )
             }
             let board=this.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
 
