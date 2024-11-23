@@ -9,12 +9,12 @@ export class GameTree {
         this.list=[]
         this.list.push( this.currentState )
         this.updateGame( this.startState )
-        this.scores={"soldier": -1,"knight": -3,"bishop": -3,"rock": -5,"queen": -9}
+        this.scores={"soldier": 100,"knight": 3000,"bishop": 3000,"rock": 5000,"queen": 9000}
     }
 
-    evaluation_function1(state) {
+    evaluation_function1( state ) {
         let score=0;
-        let removedPieces=state.removedPieces[ state.turnColor ]
+        let removedPieces=state.removedPieces[ "white" ]
         for( let piece of removedPieces )
         {
             let pieceType=piece.pieceType
@@ -22,44 +22,260 @@ export class GameTree {
             {
                 pieceType="soldier"
             }
+            else if( pieceType.toLowerCase().includes( "knight" ) )
+            {
+                pieceType="knight"
+            }
+            else if( pieceType.toLowerCase().includes( "bishop" ) )
+            {
+                pieceType="bishop"
+            }
+            else if( pieceType.toLowerCase().includes( "rock" ) )
+            {
+                pieceType="rock"
+            }
+            else if( pieceType.toLowerCase().includes( "queen" ) )
+            {
+                pieceType="queen"
+            }
             score+=this.scores[ pieceType.toLowerCase() ]
         }
         return score
     }
 
-    minimax() {
-        let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
-        let PossibleMoves = []
-        for(let piece of pieces)
-            PossibleMoves.push(...this.currentState.SuccessorFunction(piece));
-        let optimalScore= -1000;
-        let optimalMove 
-        for(let newState of PossibleMoves){
-            let score =  this.evaluation_function1(newState)
-            if(score > optimalScore){
-                console.log(score)
-                optimalScore = score;
-                optimalMove = newState;
-            }   
+    evaluation_function( state ) {
+        let value1=this.evaluation_function1( state );
+        return value1;
+    }
+
+
+    minimax( state ) {
+        let max_depth=state.depth+2;
+        let currentState=state;
+        let currentHead=0;
+        let stack=[ currentState ];
+        let Adjacency_List=new Map();
+        let i=0;
+        while( i<41 )
+        {
+
+            if( stack[ currentHead ].depth>=max_depth&&Adjacency_List.get( currentHead )!="visited" )
+            {
+                let successors;
+                let successor;
+                if( !Adjacency_List.has( currentHead ) )
+                {
+                    [ successors,stack ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,true );
+                }
+                else
+                {
+                    successors=Adjacency_List.get( currentHead ).map( ( index ) => stack[ index ] )
+                }
+                if( currentState.turn==0 )
+                {
+                    successor=this.max_value( currentState,successors );
+                }
+                else
+                {
+                    successor=this.min_value( currentState,successors );
+                }
+
+                stack[ currentHead ]=successor;
+                Adjacency_List.set( currentHead,"visited" );
+                currentState=stack[ currentHead-1 ]
+                currentHead=currentHead-1
+
+                if( Adjacency_List.has( currentHead )&&Adjacency_List.get( currentHead )!="visited" )
+                {
+
+                    successors=Adjacency_List.get( currentHead ).map( ( index ) => stack[ index ] )
+                    if( currentState.turn==0 )
+                    {
+                        successor=this.max_value( currentState,successors );
+                    }
+                    else
+                    {
+                        successor=this.min_value( currentState,successors );
+                    }
+
+                    stack[ currentHead ]=successor;
+                    Adjacency_List.set( currentHead,"visited" );
+                    Adjacency_List.forEach( ( value,key ) => {
+                        if( key>currentHead )
+                        {
+                            Adjacency_List.delete( key )
+                        }
+                    } );
+                    stack=stack.slice( 0,currentHead+1 )
+                    if( currentHead-1<0 )
+                    {
+                        break
+                    }
+
+                }
+
+            }
+
+
+            else if( currentState.depth<max_depth )
+            {
+                let lastCurrentHead=currentHead;
+                if( Adjacency_List.get( currentHead )=="visited" )
+                {
+                    while( Adjacency_List.get( currentHead )=="visited" )
+                    {
+                        currentHead-=1;
+                        currentState=stack[ currentHead ];
+                    }
+                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,false,lastCurrentHead );
+                    continue
+                }
+                else
+                {
+                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( stack[ stack.length-1 ],stack.length-1,stack,Adjacency_List,false );
+                }
+
+            }
+            else if( Adjacency_List.get( currentHead )=="visited" )
+            {
+                currentHead-=1;
+                currentState=stack[ currentHead ];
+            }
+            // console.log( currentState )
+            // console.log( currentHead )
+            // console.log( stack );
+            // console.log( Adjacency_List )
+            i+=1;
         }
-        this.currentState = optimalMove;
+        console.log( currentState )
+        console.log( currentHead )
+        console.log( stack );
+        console.log( Adjacency_List )
+        return currentState
+
+    }
+    calculateSuccessor( currentState,currentHead,stack,Adjacency_List,is_end,lastCurrentHead=null ) {
+        let pieces=currentState.turn===0? currentState.whitePieces:currentState.blackPieces;
+        let successors=[]
+        for( let piece of pieces )
+            successors.push( ...currentState.SuccessorFunction( piece ) )
+        stack.push( ...successors );
+        if( is_end )
+        {
+
+            return [ successors,stack ]
+        }
+        Adjacency_List.set( currentHead,[] )
+        if( lastCurrentHead!=null )
+        {
+            for( let index=lastCurrentHead+1;index<( stack.length );index++ )
+            {
+                Adjacency_List.get( currentHead ).push( index );
+            }
+        }
+        else
+        {
+            for( let index=currentHead+1;index<( stack.length );index++ )
+            {
+                Adjacency_List.get( currentHead ).push( index );
+            }
+        }
+        return [ currentState,currentHead,stack,Adjacency_List ];
+    }
+
+
+    max_value( state,successors ) {
+        let maxValue=-Infinity;
+        let maxSuccessor
+        for( let successor of successors )
+        {
+            let value=this.evaluation_function( successor );
+            if( value>maxValue )
+            {
+                maxValue=value;
+                maxSuccessor=successor;
+            }
+        }
+
+        return maxSuccessor;
+    }
+
+    min_value( state,successors ) {
+        let minValue=Infinity;
+        let minSuccessor
+        for( let successor of successors )
+        {
+            let value=this.evaluation_function( successor );
+            if( value<minValue )
+            {
+                minValue=value;
+                minSuccessor=successor;
+            }
+        }
+
+
+        return minSuccessor;
+    }
+
+
+
+
+
+    isTerminal( state ) {
+        return false
+    }
+
+    findRoot( state ) {
+        while( state.parent!=null )
+        {
+            state=state.parent;
+        }
+        return state
+    }
+
+    player1() {
+        this.currentState=this.minimax( this.currentState );
+        this.updateGame( this.currentState.value )
+    }
+
+
+
+    maximizer() {
+        let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
+        let PossibleMoves=[]
+        for( let piece of pieces )
+            PossibleMoves.push( ...this.currentState.SuccessorFunction( piece ) );
+        let optimalScore=-1000;
+        let optimalMove
+        for( let newState of PossibleMoves )
+        {
+            let score=this.evaluation_function1( newState )
+            if( score>optimalScore )
+            {
+                console.log( score )
+                optimalScore=score;
+                optimalMove=newState;
+            }
+        }
+        this.currentState=optimalMove;
         this.updateGame( this.currentState.value )
 
-        
+
     }
 
     Alpha_beta_pruning() {}
 
 
+
     player() {
-        this.minimax();
+        this.maximizer();
         let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
-        let PossibleMoves = []
+        let PossibleMoves=[]
         while( true )
         {
             let piece=pieces[ Math.floor( Math.random()*pieces.length ) ]
             PossibleMoves=this.currentState.SuccessorFunction( piece );
-            if(PossibleMoves.length != 0){break}
+            if( PossibleMoves.length!=0 ) {break}
         }
         this.currentState=PossibleMoves[ Math.floor( Math.random()*PossibleMoves.length ) ]
         this.updateGame( this.currentState.value )

@@ -22,7 +22,7 @@ let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blac
 
 const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startState );
 
-export let game=new GameTree( StartState,100,pieces,blackPieces,whitePieces );
+export let game=new GameTree( StartState,5,pieces,blackPieces,whitePieces );
 // game.currentState.CalculationOfPossibleMoves()
 // document.body.addEventListener( "mousedown",( e ) => game.evaluation_function1())
 
@@ -33,7 +33,8 @@ document.body.addEventListener( "keydown",( e ) => {
     }
     else if( e.key=="ArrowRight" )
     {
-        game.minimax()
+        game.player1();
     }
 }
 );
+

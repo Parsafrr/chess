@@ -7,6 +7,7 @@ export class State {
         this.depth=depth;
         this.turn=turn;
         this.turnColor=this.turn===0? "white":"black";
+        this.turnOpponentColor=this.turn===0? "black":"white";
         this.pieces=pieces;
         this.whitePieces=whitePieces;
         this.blackPieces=blackPieces;
