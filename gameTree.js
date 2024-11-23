@@ -56,21 +56,15 @@ export class GameTree {
         let stack=[ currentState ];
         let Adjacency_List=new Map();
         let i=0;
-        while( i<41 )
+        while( i<40)
         {
 
-            if( stack[ currentHead ].depth>=max_depth&&Adjacency_List.get( currentHead )!="visited" )
+            if( currentState.depth>=max_depth )
             {
+                Adjacency_List.set( currentHead,"visited" );
                 let successors;
                 let successor;
-                if( !Adjacency_List.has( currentHead ) )
-                {
-                    [ successors,stack ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,true );
-                }
-                else
-                {
-                    successors=Adjacency_List.get( currentHead ).map( ( index ) => stack[ index ] )
-                }
+                successors=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,true );
                 if( currentState.turn==0 )
                 {
                     successor=this.max_value( currentState,successors );
@@ -81,14 +75,17 @@ export class GameTree {
                 }
 
                 stack[ currentHead ]=successor;
-                Adjacency_List.set( currentHead,"visited" );
-                currentState=stack[ currentHead-1 ]
-                currentHead=currentHead-1
+                currentHead=currentHead-1;
+                currentState=stack[ currentHead ];
+            }
 
-                if( Adjacency_List.has( currentHead )&&Adjacency_List.get( currentHead )!="visited" )
+
+            else if( currentState.depth<max_depth )
+            {
+                if( Adjacency_List.has( currentHead ) )
                 {
-
-                    successors=Adjacency_List.get( currentHead ).map( ( index ) => stack[ index ] )
+                    let successors=Adjacency_List.get( currentHead ).map( ( value,index ) => stack[ value ] )
+                    let successor;
                     if( currentState.turn==0 )
                     {
                         successor=this.max_value( currentState,successors );
@@ -98,48 +95,40 @@ export class GameTree {
                         successor=this.min_value( currentState,successors );
                     }
 
+                    let upperBound;
+                    for( let i of Adjacency_List.keys() )
+                    {
+                        for( let j of Adjacency_List.get( i ) )
+                        {
+                            if( currentHead==j )
+                            {
+                                upperBound = Math.max(...Adjacency_List.get( i ))+1;
+                            }
+                        }
+                    }
                     stack[ currentHead ]=successor;
                     Adjacency_List.set( currentHead,"visited" );
+                    if( currentHead-1<0 )
+                    {
+                        currentState=stack[ currentHead ]
+                        break
+                    }
+                    stack=stack.slice( 0,upperBound )
                     Adjacency_List.forEach( ( value,key ) => {
                         if( key>currentHead )
                         {
                             Adjacency_List.delete( key )
                         }
                     } );
-                    stack=stack.slice( 0,currentHead+1 )
-                    if( currentHead-1<0 )
-                    {
-                        break
-                    }
-
-                }
-
-            }
-
-
-            else if( currentState.depth<max_depth )
-            {
-                let lastCurrentHead=currentHead;
-                if( Adjacency_List.get( currentHead )=="visited" )
-                {
-                    while( Adjacency_List.get( currentHead )=="visited" )
-                    {
-                        currentHead-=1;
-                        currentState=stack[ currentHead ];
-                    }
-                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,false,lastCurrentHead );
-                    continue
+                    stack[ currentHead ]=successor;
+                    currentHead=currentHead-1;
+                    currentState=stack[ currentHead ];
                 }
                 else
                 {
-                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( stack[ stack.length-1 ],stack.length-1,stack,Adjacency_List,false );
+                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,false );
                 }
 
-            }
-            else if( Adjacency_List.get( currentHead )=="visited" )
-            {
-                currentHead-=1;
-                currentState=stack[ currentHead ];
             }
             // console.log( currentState )
             // console.log( currentHead )
@@ -159,27 +148,23 @@ export class GameTree {
         let successors=[]
         for( let piece of pieces )
             successors.push( ...currentState.SuccessorFunction( piece ) )
-        stack.push( ...successors );
         if( is_end )
         {
 
-            return [ successors,stack ]
-        }
-        Adjacency_List.set( currentHead,[] )
-        if( lastCurrentHead!=null )
-        {
-            for( let index=lastCurrentHead+1;index<( stack.length );index++ )
-            {
-                Adjacency_List.get( currentHead ).push( index );
-            }
+            return successors
         }
         else
         {
+            stack.push( ...successors );
+            Adjacency_List.set( currentHead,[] )
             for( let index=currentHead+1;index<( stack.length );index++ )
             {
                 Adjacency_List.get( currentHead ).push( index );
             }
         }
+
+        currentHead=stack.length-1;
+        currentState=stack[ currentHead ];
         return [ currentState,currentHead,stack,Adjacency_List ];
     }
 
