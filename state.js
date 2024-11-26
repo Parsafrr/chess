@@ -1,3 +1,4 @@
+import {Piece} from "./piece.js";
 import {createBoardAndPieces} from "/createBoard.js";
 
 export class State {
@@ -12,10 +13,50 @@ export class State {
         this.whitePieces=whitePieces;
         this.blackPieces=blackPieces;
         this.removedPieces=removedPieces;
+        this.isTerminal=false;
+        this.score=0
+        this.computeAllMove( this.value );
+    }
+
+    computeKingMove(king,successors) {
+        let newSuccessors=[];
+        for( let successor of successors )
+        {
+            king = successor.pieces.find(piece=>piece.pieceID == king.pieceID)
+            if( king.opponentReach.length==0 )
+            {
+                newSuccessors.push( successor )
+            }
+        }
+        return newSuccessors
+    }
+
+    computeAllSuccessors() {
+        let pieces=this.turn===0? this.whitePieces:this.blackPieces
+        let successors=[];
+        for( let piece of pieces )
+        {
+
+            let PossibleStates=this.SuccessorFunction( piece );
+            successors.push( ...PossibleStates )
+            if(piece.pieceType == "king"){
+                successors = this.computeKingMove(piece,successors)
+            }
+        }
+        return successors;
+    }
+
+    computeAllMove( board ) {
+        for( let piece of this.pieces )
+        {
+            piece.Calculate_allMoves( board );
+            piece.Calculate_normalMove( board );
+            piece.Calculate_attackMove( board );
+        }
     }
 
     SuccessorFunction( piece ) {
-        this.CalculationOfPossibleMoves();
+        let board=this.value;
         const PossibleMoves=[];
         const PossibleState=[];
         const normalMoves=[ ...piece.normalMove ]
@@ -40,7 +81,7 @@ export class State {
             let [ i,j ]=piece.piecePosition;
             let opponentPiece=this.value[ move[ 0 ] ][ move[ 1 ] ]
             let removedPiece=opponentPiece;
-            let newRemovedPieces=JSON.parse(JSON.stringify(this.removedPieces));;
+            let newRemovedPieces=JSON.parse( JSON.stringify( this.removedPieces ) );;
             newRemovedPieces[ removedPiece.color ].push( removedPiece );
             let tmp=board[ i ][ j ];
             board[ move[ 0 ] ][ move[ 1 ] ]=tmp;
@@ -51,22 +92,5 @@ export class State {
         return PossibleState;
     }
 
-    CalculationOfPossibleMoves() {
 
-        const turn=this.turn;
-        const opponent=turn===0? "white":"black";
-
-        function is_opponent( board,move ) {
-            return board[ move[ 0 ] ][ move[ 1 ] ].includes( opponent );
-        }
-
-        const board=this.value;
-
-        for( const piece of this.pieces )
-        {
-            piece.Calculate_allMoves( board );
-            piece.Calculate_normalMove( board );
-            piece.Calculate_attackMove( board );
-        }
-    }
 }

@@ -2,6 +2,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color:rgb(56, 53, 53);
+
 }
 
 #gameBoard {
@@ -10,6 +12,7 @@ body {
     border: 1px solid black;
     display: grid;
     grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+    border: none;
 }
 #gameBoard > div{
     display: grid;
@@ -21,6 +24,7 @@ body {
     align-items: center;
     width: 100%;
     height: 100%;
+    border: 1px  solid rgb(48, 13, 13);
 }
 #gameBoard > div > div > div  > img{
     width: 70%;

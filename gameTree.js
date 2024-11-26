@@ -1,3 +1,4 @@
+import {Piece} from "/piece.js";
 import {State} from "/state.js";
 
 
@@ -14,7 +15,7 @@ export class GameTree {
 
     evaluation_function1( state ) {
         let score=0;
-        let removedPieces=state.removedPieces[ "white" ]
+        let removedPieces=state.removedPieces[ "white" ].concat( state.removedPieces[ 'black' ] )
         for( let piece of removedPieces )
         {
             let pieceType=piece.pieceType
@@ -38,7 +39,14 @@ export class GameTree {
             {
                 pieceType="queen"
             }
-            score-=this.scores[ pieceType.toLowerCase() ]
+            if( piece.color=="black" )
+            {
+                score+=this.scores[ pieceType.toLowerCase() ]
+            }
+            else if( piece.color=="white" )
+            {
+                score-=this.scores[ pieceType.toLowerCase() ]
+            }
         }
         return score
     }
@@ -73,20 +81,65 @@ export class GameTree {
 
     }
 
-    evaluation_function( state ) {
-        let value1=this.evaluation_function1( state );
-        let value2=this.evaluation_function2( state );
-        return 10*value1+5*value2;
+
+    evaluation_terminal( state ) {
+        let pieces=state.turn===0? state.whitePieces:state.blackPieces;
+        let king=pieces.find( piece => piece.pieceType=="king" );
+        let score;
+        if( this.isTerminal( state,king ) )
+        {
+            let successors = state.SuccessorFunction(king)
+            successors = state.computeKingMove(king,successors)
+            if( successors.length==0 )
+            {
+                state.isTerminal=true;
+                if( king.color=="white" ) {score=-Infinity}
+                else if( king.color=="black" ) {score=Infinity}
+            }
+            else
+            {
+                if( state.turn==0 )
+                {
+                    score=successors.length
+                }
+                else if( state.turn==1 )
+                {
+                    score=-successors.length
+                }
+            }
+            return score;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    isTerminal( state,king ) {
+        if( king.opponentReach.length!=0 )
+        {
+            return true;
+        }
+        else {return false}
     }
 
 
+    evaluation_function( state ) {
+        let value1=this.evaluation_function1( state );
+        let value2=this.evaluation_function2( state );
+        let valueTerminal=this.evaluation_terminal( state );
+        return 10*value1+5*value2+1000*valueTerminal;
+    }
+
+
+
+
     minimax( state ) {
+        let next_depth=state.depth+1;
         let max_depth=state.depth+2;
         let currentState=state;
         let currentHead=0;
         let stack=[ currentState ];
         let Adjacency_List=new Map();
-        let i=0;
         let alpha=-Infinity;
         let beta=+Infinity;
         let value;
@@ -97,7 +150,9 @@ export class GameTree {
                 Adjacency_List.set( currentHead,"visited" );
                 let successors;
                 let successor;
-                successors=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,true );
+
+
+                successors=currentState.computeAllSuccessors();
                 if( currentState.turn==0 )
                 {
                     [ successor,value ]=this.max_value( currentState,successors );
@@ -127,6 +182,7 @@ export class GameTree {
                     {
                         [ successor,value ]=this.min_value( currentState,successors );
                     }
+
                     if( currentHead==0 )
                     {
                         stack[ currentHead ]=successor;
@@ -161,7 +217,7 @@ export class GameTree {
                 }
                 else
                 {
-                    [ currentState,currentHead,stack,Adjacency_List ]=this.calculateSuccessor( currentState,currentHead,stack,Adjacency_List,false );
+                    [ currentState,currentHead,stack,Adjacency_List ]=this.addSuccessor( currentState,currentHead,stack,Adjacency_List );
                 }
             }
             else if( Adjacency_List.get( currentHead )=="visited" )
@@ -169,41 +225,33 @@ export class GameTree {
                 currentHead-=1;
                 currentState=stack[ currentHead ]
             }
-            // console.log( currentState )
-            // console.log( currentHead )
-            // console.log( stack );
-            // console.log( Adjacency_List )
-            i+=1;
         }
         // console.log( currentState )
         // console.log( currentHead )
         // console.log( stack );
         // console.log( Adjacency_List )
         // console.log(this.findRoot(currentState,max_depth-1))
-        console.log(currentState.removedPieces)
+        if( !currentState )
+        {
+            return state
+        }
+        let root=this.findRoot( currentState,next_depth )
         console.log( value )
-        return this.findRoot( currentState,max_depth-1 )
+        console.log( root )
+        // console.log( value ) 
+        return root;
 
     }
-    calculateSuccessor( currentState,currentHead,stack,Adjacency_List,is_end ) {
+    addSuccessor( currentState,currentHead,stack,Adjacency_List ) {
         let pieces=currentState.turn===0? currentState.whitePieces:currentState.blackPieces;
-        let successors=[]
-        for( let piece of pieces )
-            successors.push( ...currentState.SuccessorFunction( piece ) )
-        if( is_end )
+        let king=pieces.find( piece => piece.pieceType=="king" )
+        let successors=currentState.computeAllSuccessors();
+        let lastHeadOfStack=stack.length;
+        stack.push( ...successors );
+        Adjacency_List.set( currentHead,[] )
+        for( let index=lastHeadOfStack;index<( stack.length );index++ )
         {
-
-            return successors
-        }
-        else
-        {
-            let lastHeadOfStack=stack.length;
-            stack.push( ...successors );
-            Adjacency_List.set( currentHead,[] )
-            for( let index=lastHeadOfStack;index<( stack.length );index++ )
-            {
-                Adjacency_List.get( currentHead ).push( index );
-            }
+            Adjacency_List.get( currentHead ).push( index );
         }
 
         currentHead=stack.length-1;
@@ -218,6 +266,7 @@ export class GameTree {
         for( let successor of successors )
         {
             let value=this.evaluation_function( successor );
+            successor.score=value;
             if( value>maxValue )
             {
                 maxValue=value;
@@ -233,13 +282,13 @@ export class GameTree {
         for( let successor of successors )
         {
             let value=this.evaluation_function( successor );
+            successor.score=value;
             if( value<minValue )
             {
                 minValue=value;
                 minSuccessor=successor;
             }
         }
-
         return [ minSuccessor,minValue ];
     }
 
@@ -247,13 +296,11 @@ export class GameTree {
 
 
 
-    isTerminal( state ) {
-        return false
-    }
 
     findRoot( state,minDepth ) {
         while( state.depth>minDepth )
         {
+            console.log( this.evaluation_function( state ) )
             state=state.parent;
         }
         return state
@@ -278,7 +325,6 @@ export class GameTree {
             let score=this.evaluation_function1( newState )
             if( score>optimalScore )
             {
-                console.log( score )
                 optimalScore=score;
                 optimalMove=newState;
             }
