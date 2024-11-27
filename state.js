@@ -49,10 +49,10 @@ export class State {
     computeAllMove( board ) {
         for( let piece of this.pieces )
         {
-            piece.Calculate_allMoves( board );
-            piece.Calculate_normalMove( board );
-            piece.Calculate_attackMove( board );
-        }
+                piece.Calculate_allMoves( board );
+                piece.Calculate_normalMove( board );
+                piece.Calculate_attackMove( board );
+            }
     }
 
     SuccessorFunction( piece ) {

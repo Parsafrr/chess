@@ -300,7 +300,6 @@ export class GameTree {
     findRoot( state,minDepth ) {
         while( state.depth>minDepth )
         {
-            console.log( this.evaluation_function( state ) )
             state=state.parent;
         }
         return state

@@ -162,6 +162,10 @@ export class Piece {
                             this.attackMove.push( move )
                             break
                         }
+                        else if( piece.color==this.opponentColor&&piece.pieceType=="king" ){
+                            this.ownReach.push( piece.pieceID )
+                            piece.opponentReach.push( this.pieceID )
+                        }
                     }
                 }
             }
