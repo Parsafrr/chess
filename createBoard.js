@@ -22,7 +22,7 @@ export function  createBoardAndPieces( state ) {
         },
         "knight": ( i,j ) => [
             [ i+2,j+1 ],[ i+2,j-1 ],[ i-2,j+1 ],[ i-2,j-1 ],
-            [ i+1,j+2 ],[ i+1,j-2 ],[ i-1,j+2 ],[ i-1,j-2 ]
+            [ i+1,j+2 ],[ i-1,j+2 ],[ i+1,j-2 ],[ i-1,j-2 ]
         ],
         "queen": ( i,j ) => [ ...allMoves.rock( i,j ),...allMoves.bishop( i,j ) ],
         "king": ( i,j ) => [

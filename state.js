@@ -18,11 +18,11 @@ export class State {
         this.computeAllMove( this.value );
     }
 
-    computeKingMove(king,successors) {
+    computeKingMove( king,successors ) {
         let newSuccessors=[];
         for( let successor of successors )
         {
-            king = successor.pieces.find(piece=>piece.pieceID == king.pieceID)
+            king=successor.pieces.find( piece => piece.pieceID==king.pieceID )
             if( king.opponentReach.length==0 )
             {
                 newSuccessors.push( successor )
@@ -39,8 +39,9 @@ export class State {
 
             let PossibleStates=this.SuccessorFunction( piece );
             successors.push( ...PossibleStates )
-            if(piece.pieceType == "king"){
-                successors = this.computeKingMove(piece,successors)
+            if( piece.pieceType=="king" )
+            {
+                successors=this.computeKingMove( piece,successors )
             }
         }
         return successors;
@@ -49,10 +50,10 @@ export class State {
     computeAllMove( board ) {
         for( let piece of this.pieces )
         {
-                piece.Calculate_allMoves( board );
-                piece.Calculate_normalMove( board );
-                piece.Calculate_attackMove( board );
-            }
+            piece.Calculate_allMoves( board );
+            piece.Calculate_normalMove( board );
+            piece.Calculate_attackMove( board );
+        }
     }
 
     SuccessorFunction( piece ) {

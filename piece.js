@@ -21,26 +21,35 @@ export class Piece {
 
 
         let steps={0: {},1: {},2: {},3: {},4: {},5: {},6: {},7: {}}
+        let Displacement=[];
         for( let move of moves )
         {
-            let [ currentX,currentY ]=move;
-            let [ nextX,nextY ]=this.piecePosition;
+            let [ currentX,currentY ]=this.piecePosition;
+            let [ nextX,nextY ]=move;
             let DisplacementX=currentX-nextX;
             let DisplacementY=currentY-nextY;
             let absDisplacementX=Math.abs( currentX-nextX );
             let absDisplacementY=Math.abs( currentY-nextY );
 
-            if( DisplacementX!=0&&DisplacementY!=0 )
+            if( DisplacementX*DisplacementY!=0 )
             {
                 if( DisplacementX*DisplacementY>0 )
                 {
                     if( DisplacementX>0&&DisplacementY>0 )
                     {
-                        steps[ 0 ][ absDisplacementX+absDisplacementY ]=move;
+                        if( steps[ 0 ][ absDisplacementX+absDisplacementY ] )
+                        {
+                            steps[ 0 ][ absDisplacementX+absDisplacementY+1 ]=move;
+                        }
+                        else{steps[ 0 ][ absDisplacementX+absDisplacementY ]=move;}
                     }
                     else if( DisplacementX<0&&DisplacementY<0 )
                     {
-                        steps[ 1 ][ absDisplacementX+absDisplacementY ]=move;
+                        if( steps[ 1 ][ absDisplacementX+absDisplacementY ] )
+                        {
+                            steps[ 1 ][ absDisplacementX+absDisplacementY+1 ]=move;
+                        }
+                        else{steps[ 1 ][ absDisplacementX+absDisplacementY ]=move;}
                     }
 
                 }
@@ -48,11 +57,19 @@ export class Piece {
                 {
                     if( DisplacementX>0&&DisplacementY<0 )
                     {
-                        steps[ 2 ][ absDisplacementX+absDisplacementY ]=move;
+                        if( steps[ 2 ][ absDisplacementX+absDisplacementY ] )
+                        {
+                            steps[ 2 ][ absDisplacementX+absDisplacementY+1 ]=move;
+                        }
+                        else{steps[ 2 ][ absDisplacementX+absDisplacementY ]=move;}
                     }
                     else if( DisplacementX<0&&DisplacementY>0 )
                     {
-                        steps[ 3 ][ absDisplacementX+absDisplacementY ]=move;
+                        if( steps[ 3 ][ absDisplacementX+absDisplacementY ] )
+                        {
+                            steps[ 3 ][ absDisplacementX+absDisplacementY+1 ]=move;
+                        }
+                        else{steps[ 3 ][ absDisplacementX+absDisplacementY ]=move;}
                     }
 
                 }
@@ -62,22 +79,22 @@ export class Piece {
             {
                 if( DisplacementY<0 )
                 {
-                    steps[ 4 ][ absDisplacementX+absDisplacementY ]=move;
+                    steps[ 4 ][ absDisplacementY ]=move;
                 }
                 else if( DisplacementY>0 )
                 {
-                    steps[ 5 ][ absDisplacementX+absDisplacementY ]=move;
+                    steps[ 5 ][ absDisplacementY ]=move;
                 }
             }
             else if( DisplacementX!=0&&DisplacementY==0 )
             {
                 if( DisplacementX<0 )
                 {
-                    steps[ 6 ][ absDisplacementX+absDisplacementY ]=move;
+                    steps[ 6 ][ absDisplacementX ]=move;
                 }
                 else if( DisplacementX>0 )
                 {
-                    steps[ 7 ][ absDisplacementX+absDisplacementY ]=move;
+                    steps[ 7 ][ absDisplacementX ]=move;
                 }
             }
 
@@ -162,7 +179,8 @@ export class Piece {
                             this.attackMove.push( move )
                             break
                         }
-                        else if( piece.color==this.opponentColor&&piece.pieceType=="king" ){
+                        else if( piece.color==this.opponentColor&&piece.pieceType=="king" )
+                        {
                             this.ownReach.push( piece.pieceID )
                             piece.opponentReach.push( this.pieceID )
                         }
@@ -189,15 +207,18 @@ export class Piece {
                     }
                     else if( board[ moveX ][ moveY ]=='' )
                     {
-                        if(this.color =="black" && this.piecePosition[0] !=1){   /*Preventing double pawn moves after the first move */
+                        if( this.color=="black"&&this.piecePosition[ 0 ]!=1 )
+                        {   /*Preventing double pawn moves after the first move */
                             this.normalMove.push( move )
                             break
                         }
-                        else if(this.color =="white" && this.piecePosition[0] !=6){
+                        else if( this.color=="white"&&this.piecePosition[ 0 ]!=6 )
+                        {
                             this.normalMove.push( move )
                             break
                         }
-                        else{
+                        else
+                        {
                             this.normalMove.push( move )
                         }
 
@@ -230,7 +251,7 @@ export class Piece {
             ];
 
             let isValid=true; // Assume the move is valid initially
-            
+
             for( let neighbor of surroundingSquares )
             {
                 let [ nx,ny ]=neighbor;

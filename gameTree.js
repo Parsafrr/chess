@@ -1,5 +1,7 @@
 import {Piece} from "/piece.js";
 import {State} from "/state.js";
+import {createBoardAndPieces} from "/createBoard.js";
+
 
 
 export class GameTree {
@@ -88,8 +90,8 @@ export class GameTree {
         let score;
         if( this.isTerminal( state,king ) )
         {
-            let successors = state.SuccessorFunction(king)
-            successors = state.computeKingMove(king,successors)
+            let successors=state.SuccessorFunction( king )
+            successors=state.computeKingMove( king,successors )
             if( successors.length==0 )
             {
                 state.isTerminal=true;
@@ -311,6 +313,24 @@ export class GameTree {
     }
 
 
+    player2( piece,moveX,moveY ) {
+        if( this.currentState.turn==0 )
+        {
+            let board=this.currentState.value.map( row => row.map( piece => piece!==""? piece.pieceID:"" ) );
+            let [ i,j ]=piece.piecePosition;
+            let tmp=board[ i ][ j ];
+            board[ moveX ][ moveY ]=piece.pieceID;
+            board[ i ][ j ]="";
+            console.log( moveX,moveY )
+            let [ newBoard,newPieces,newBlackPieces,newWhitePieces ]=createBoardAndPieces( board )
+            this.currentState=new State( this.currentState,newBoard,this.currentState.depth+1,( this.currentState.turn+1 )%2,newPieces,newBlackPieces,newWhitePieces,this.currentState.removedPieces )
+            this.updateGame( this.currentState.value )
+
+        }
+        this.currentState=this.minimax( this.currentState );
+        this.updateGame( this.currentState.value )
+
+    }
 
     maximizer() {
         let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
@@ -334,25 +354,6 @@ export class GameTree {
 
     }
 
-    Alpha_beta_pruning() {}
-
-
-
-    player() {
-        this.maximizer();
-        let pieces=this.currentState.turn===0? this.currentState.whitePieces:this.currentState.blackPieces
-        let PossibleMoves=[]
-        while( true )
-        {
-            let piece=pieces[ Math.floor( Math.random()*pieces.length ) ]
-            PossibleMoves=this.currentState.SuccessorFunction( piece );
-            if( PossibleMoves.length!=0 ) {break}
-        }
-        this.currentState=PossibleMoves[ Math.floor( Math.random()*PossibleMoves.length ) ]
-        this.updateGame( this.currentState.value )
-    }
-
-
     updateGame( state ) {
         for( let i=0;i<=7;i++ )
         {
@@ -370,6 +371,8 @@ export class GameTree {
                 const lastDiv=gameBoard.children[ i ].children[ j ].children[ 0 ]
                 if( lastDiv )
                 {
+                    let moves = lastDiv.getAttribute("data-moves") 
+                    div.setAttribute("data-moves",moves)
                     gameBoard.children[ i ].children[ j ].children[ 0 ].remove();
                 }
                 gameBoard.children[ i ].children[ j ].appendChild( div );
