@@ -13,17 +13,19 @@ export class State {
         this.whitePieces=whitePieces;
         this.blackPieces=blackPieces;
         this.removedPieces=removedPieces;
-        this.isTerminal=false;
-        this.score=0
+        this.whiteKing=null;
+        this.blackKing=null;
+        this.score=0;
         this.computeAllMove( this.value );
     }
 
-    computeKingMove( king,successors ) {
+    computeKingMove( king ) {
+        let successors=this.SuccessorFunction( king )
         let newSuccessors=[];
         for( let successor of successors )
         {
-            king=successor.pieces.find( piece => piece.pieceID==king.pieceID )
-            if( king.opponentReach.length==0 )
+            let newKing=successor.pieces.find( piece => piece.pieceID==king.pieceID )
+            if( newKing.opponentReach.length==0 )
             {
                 newSuccessors.push( successor )
             }
@@ -36,12 +38,14 @@ export class State {
         let successors=[];
         for( let piece of pieces )
         {
-
-            let PossibleStates=this.SuccessorFunction( piece );
-            successors.push( ...PossibleStates )
-            if( piece.pieceType=="king" )
+            if( piece.pieceType!="king" )
             {
-                successors=this.computeKingMove( piece,successors )
+                let PossibleStates=this.SuccessorFunction( piece );
+                successors.push( ...PossibleStates )
+            }
+            else
+            {
+                successors.push( ...this.computeKingMove( piece,successors ) )
             }
         }
         return successors;
@@ -50,6 +54,8 @@ export class State {
     computeAllMove( board ) {
         for( let piece of this.pieces )
         {
+            if( piece.pieceID=="whiteKing" ) {this.whiteKing=piece}
+            else if( piece.pieceID=="blackKing" ) {this.blackKing=piece}
             piece.Calculate_allMoves( board );
             piece.Calculate_normalMove( board );
             piece.Calculate_attackMove( board );

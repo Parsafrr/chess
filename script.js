@@ -1,6 +1,7 @@
 import {createBoardAndPieces} from "/createBoard.js";
 import {State} from "/state.js";
-import {GameTree} from "/gameTree.js";
+// import {GameTree} from "/gameTree.js";
+import { GameTree } from "./minimax.js";
 import {Piece} from "/piece.js";
 // import { GameTree } from "./Alpha_beta_pruning.js";
 
@@ -17,6 +18,16 @@ let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blac
 [ "","","","","","","","" ],
 [ "whiteSoldier1","whiteSoldier2","whiteSoldier3","whiteSoldier4","whiteSoldier5","whiteSoldier6","whiteSoldier7","whiteSoldier8" ],
 [ "whiteRock1","whiteKnight1","whiteBishop1","whiteQueen","whiteKing","whiteBishop2","whiteKnight2","whiteRock2" ],];
+
+// let startState=[[ "blackRock1","blackKnight1","blackBishop1","blackQueen","blackKing","blackBishop2","blackKnight2","blackRock2" ],
+//                             [ "blackSoldier1","blackSoldier2","blackSoldier3","","blackSoldier5","blackSoldier6","blackSoldier7","blackSoldier8" ],
+//                             [ "","","","blackSoldier4","","","","" ],
+//                             [ "","","","","","","","" ],
+//                             [ "","","","","","","","" ],
+//                             [ "","whiteQueen","whiteSoldier3","","","","","" ],
+//                             [ "whiteSoldier1","whiteSoldier2","","whiteSoldier4","whiteSoldier5","whiteSoldier6","whiteSoldier7","whiteSoldier8" ],
+//                             [ "whiteRock1","whiteKnight1","whiteBishop1","","whiteKing","whiteBishop2","whiteKnight2","whiteRock2" ],];
+
 
 // let startState=[ [ "","","","","blackKing","","","" ],
 // [ "","","","","","","","" ],
@@ -60,10 +71,10 @@ let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blac
 // [ "","","","","","","","" ],
 // [ "","","","","","","","" ],
 // [ "","","","","","","","" ],
-// [ "","","","whiteKnight1","","","","" ],
-// [ "","","","","","","","whiteSoldier1" ],
 // [ "","","","","","","","" ],
-// [ "whiteQueen","","whiteKing","","","","","" ],];
+// [ "blackrock2","","","","","","","" ],
+// [ "","","","","","","","" ],
+// [ "blackRock1","","whiteKing","","","","","" ],];
 
 
 const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startState );
@@ -75,16 +86,16 @@ document.body.addEventListener( "keydown",( e ) => {
     {
         game.updateGame( game.currentState.parent.value )
     }
-    // else if( e.key=="ArrowRight" )
-    // {
-    //     game.player2();
-    // }
+    else if( e.key=="ArrowRight" )
+    {
+        game.minimax(game.currentState);
+    }
     else if( e.key=="ArrowUp" )
     {
         console.log( game.evaluation_function( game.currentState ) );
     }
     else if( e.key=="ArrowDown" )
-    {
+    {   
         console.log( game.currentState );
     }
 }
