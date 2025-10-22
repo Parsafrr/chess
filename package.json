@@ -1,0 +1,10 @@
+{
+  "name": "chess-demo",
+  "version": "0.1.0",
+  "description": "Small browser-based chess engine and AI demo",
+  "main": "index.htm",
+  "scripts": {
+    "start": "" 
+  },
+  "license": "MIT"
+}

@@ -1,5 +1,10 @@
 import { Piece } from "/piece.js";
 
+/**
+ * Build piece objects and lists from a 2D array of piece ID strings.
+ * @param {Array<Array<string>>} state - 8x8 array with piece IDs or empty string "".
+ * @returns {[Array, Array<Piece>, Array<Piece>, Array<Piece>]} [board, pieces, blackPieces, whitePieces]
+ */
 export function  createBoardAndPieces( state ) {
     const allMoves={
         "whiteSoldier": ( i,j ) => [ [ i-1,j ],[ i-2,j ],[ i-1,j-1 ],[ i-1,j+1 ] ],

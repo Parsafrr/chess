@@ -1,4 +1,20 @@
+/**
+ * Represents a chess piece and computes its possible moves and reachability.
+ * @property {string} pieceID - Unique identifier for the piece (e.g. 'whiteKing').
+ * @property {[number,number]} piecePosition - Board coordinates [row, col].
+ * @property {function} pieceMoves - Function that given (i,j) returns candidate move coordinates.
+ * @property {string} color - 'white' or 'black'.
+ * @property {string} pieceType - Type name such as 'king', 'queen', 'soldier'.
+ */
 export class Piece {
+    /**
+     * Create a Piece
+     * @param {string} pieceID
+     * @param {[number,number]} piecePosition
+     * @param {function} pieceMoves
+     * @param {string} color
+     * @param {string} pieceType
+     */
     constructor ( pieceID,piecePosition,pieceMoves,color,pieceType ) {
         this.pieceID=pieceID;
         this.color=color;
@@ -13,6 +29,11 @@ export class Piece {
         this.opponentReach=[];
     }
 
+    /**
+     * Calculate all directional candidate moves for this piece and store them in `allMoves`.
+     * This arranges moves by direction and step distance to make move blocking simple.
+     * @param {Array<Array>} board - current board matrix (used only to constrain moves to board bounds)
+     */
     Calculate_allMoves( board ) {
         let moves=this.pieceMoves( ... this.piecePosition ).filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
@@ -104,7 +125,11 @@ export class Piece {
 
     }
 
-
+    /**
+     * From `allMoves` compute `normalMove` (empty-square moves) and update reachability lists.
+     * Handles special handling for kings and soldiers (pawns).
+     * @param {Array<Array>} board
+     */
     Calculate_normalMove( board ) {
         if( this.pieceType.includes( "Soldier" ) )
         {
@@ -149,6 +174,11 @@ export class Piece {
 
     }
 
+    /**
+     * Compute capture/attack moves for the piece and populate `attackMove`.
+     * Pawns are handled separately.
+     * @param {Array<Array>} board
+     */
     Calculate_attackMove( board ) {
         if( this.pieceType.includes( "Soldier" ) )
         {
@@ -159,6 +189,10 @@ export class Piece {
             this.is_opponentInPosition( board,this.opponentColor,this.allMoves )
         }
     }
+    /**
+     * Pawn-specific move calculation (attacks and forward movement rules including double-step prevention).
+     * @param {Array<Array>} board
+     */
     Calculate_SoldierMove( board ) {
 
         for( let direction in this.allMoves )
@@ -230,6 +264,11 @@ export class Piece {
         }
     }
 
+    /**
+     * Filter move coordinates to those within the 8x8 board.
+     * @param {Array<[number,number]>} moves
+     * @returns {Array<[number,number]>}
+     */
     is_InBoard( moves ) {
         moves=moves.filter( move =>
             move[ 0 ]>=0&&move[ 0 ]<8&&move[ 1 ]>=0&&move[ 1 ]<8
@@ -237,6 +276,10 @@ export class Piece {
         return moves
     }
 
+    /**
+     * Filter king moves to prevent moving adjacent to the opponent king.
+     * @param {Array<Array>} board
+     */
     filterKingMove( board ) {
         let validMoves=[]; // Temporary array to store valid moves
 
@@ -281,6 +324,12 @@ export class Piece {
         this.normalMove=validMoves;
     }
 
+    /**
+     * Helper to find opponent pieces reachable in `allMoves` and populate `attackMove`.
+     * @param {Array<Array>} board
+     * @param {string} opponentColor
+     * @param {Object} moves
+     */
     is_opponentInPosition( board,opponentColor,moves ) {
         for( let direction in this.allMoves )
         {

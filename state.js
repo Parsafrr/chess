@@ -1,7 +1,25 @@
 import {Piece} from "./piece.js";
 import {createBoardAndPieces} from "/createBoard.js";
 
+/**
+ * Represents a game state for the chess board.
+ * @property {State|null} parent
+ * @property {Array<Array>} value - 2D board array with Piece objects or "".
+ * @property {number} depth - search depth
+ * @property {number} turn - 0 for white, 1 for black
+ */
 export class State {
+    /**
+     * Create a State
+     * @param {State|null} parent
+     * @param {Array<Array>} value
+     * @param {number} depth
+     * @param {number} turn
+     * @param {Array<Piece>} pieces
+     * @param {Array<Piece>} blackPieces
+     * @param {Array<Piece>} whitePieces
+     * @param {{white:Array,black:Array}} removedPieces
+     */
     constructor ( parent,value,depth,turn,pieces,blackPieces,whitePieces,removedPieces={"white": [],"black": []} ) {
         this.parent=parent;
         this.value=value;

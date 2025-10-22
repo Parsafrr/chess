@@ -4,7 +4,17 @@ import {createBoardAndPieces} from "/createBoard.js";
 
 
 
+/**
+ * Simple minimax-based GameTree controller used by the UI.
+ */
 export class GameTree {
+    /**
+     * @param {Array<Array>} startState - board array (Piece objects or "")
+     * @param {number} max_depth
+     * @param {Array<Piece>} pieces
+     * @param {Array<Piece>} blackPieces
+     * @param {Array<Piece>} whitePieces
+     */
     constructor ( startState,max_depth,pieces,blackPieces,whitePieces ) {
         this.startState=startState;
         this.max_depth=max_depth;

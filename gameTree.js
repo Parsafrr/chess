@@ -4,7 +4,17 @@ import {createBoardAndPieces} from "/createBoard.js";
 
 
 
+/**
+ * Alternate GameTree implementation (search and evaluation utilities).
+ */
 export class GameTree {
+    /**
+     * @param {Array<Array>} startState
+     * @param {number} max_depth
+     * @param {Array<Piece>} pieces
+     * @param {Array<Piece>} blackPieces
+     * @param {Array<Piece>} whitePieces
+     */
     constructor ( startState,max_depth,pieces,blackPieces,whitePieces ) {
         this.startState=startState;
         this.max_depth=max_depth;

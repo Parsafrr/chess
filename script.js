@@ -1,3 +1,6 @@
+/**
+ * Entry script that wires up the initial board and creates a GameTree AI instance.
+ */
 import {createBoardAndPieces} from "/createBoard.js";
 import {State} from "/state.js";
 // import {GameTree} from "/gameTree.js";
