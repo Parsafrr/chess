@@ -4,7 +4,7 @@
   "description": "Small browser-based chess engine and AI demo",
   "main": "index.htm",
   "scripts": {
-    "start": "" 
+    "start": "npx http-server -c-1 -p 8000"
   },
   "license": "MIT"
 }
