@@ -2,6 +2,8 @@
 
 This repository contains a small JavaScript chess engine and UI scaffold. It implements piece movement generation, game state, and simple AI (minimax / alpha-beta variants).
 
+Disclaimer: This project was created for educational and recreational purposes and is incomplete. Use it as a learning reference rather than a production-ready engine.
+
 ## What you'll find
 
 - `piece.js` — Piece class and move generation helpers.
