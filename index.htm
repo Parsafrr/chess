@@ -92,8 +92,26 @@
         </div>
 
     </div>
-    <script type="module"  src="designBoard.js"></script>
-    <script type="module" src="script.js"></script>
+    <script>
+        // If the page is opened directly via file://, ES module loads will be blocked by CORS in many browsers.
+        if (location.protocol === 'file:') {
+            const warn = document.createElement('div');
+            warn.textContent = 'This page is loaded via file:// which blocks ES module imports in many browsers.\nPlease run a local HTTP server (see README) and open http://127.0.0.1:8000 instead.';
+            warn.style.position = 'fixed';
+            warn.style.left = '0';
+            warn.style.right = '0';
+            warn.style.top = '0';
+            warn.style.padding = '12px';
+            warn.style.background = '#ffdddd';
+            warn.style.color = '#800';
+            warn.style.fontFamily = 'sans-serif';
+            warn.style.whiteSpace = 'pre-wrap';
+            warn.style.zIndex = '9999';
+            document.body.prepend(warn);
+        }
+    </script>
+    <script type="module" src="./designBoard.js"></script>
+    <script type="module" src="./script.js"></script>
 
 </body>
 
