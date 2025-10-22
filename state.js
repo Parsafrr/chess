@@ -1,5 +1,5 @@
 import {Piece} from "./piece.js";
-import {createBoardAndPieces} from "/createBoard.js";
+import {createBoardAndPieces} from "./createBoard.js";
 
 /**
  * Represents a game state for the chess board.

@@ -1,6 +1,6 @@
-import {Piece} from "/piece.js";
-import {State} from "/state.js";
-import {createBoardAndPieces} from "/createBoard.js";
+import {Piece} from "./piece.js";
+import {State} from "./state.js";
+import {createBoardAndPieces} from "./createBoard.js";
 
 
 

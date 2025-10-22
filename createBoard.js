@@ -1,4 +1,4 @@
-import { Piece } from "/piece.js";
+import { Piece } from "./piece.js";
 
 /**
  * Build piece objects and lists from a 2D array of piece ID strings.

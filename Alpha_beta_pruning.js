@@ -1,5 +1,5 @@
-import {Piece} from "/piece.js";
-import {State} from "/state.js";
+import {Piece} from "./piece.js";
+import {State} from "./state.js";
 
 /**
  * Alpha-beta pruning variant of GameTree (work-in-progress).
