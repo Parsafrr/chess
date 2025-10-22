@@ -5,7 +5,8 @@ import {createBoardAndPieces} from "./createBoard.js";
 import {State} from "./state.js";
 // import {GameTree} from "/gameTree.js";
 import { GameTree } from "./minimax.js";
-import {Piece} from "/piece.js";
+import {Piece} from "./piece.js";
+import { initDesignBoard } from "./designBoard.js";
 // import { GameTree } from "./Alpha_beta_pruning.js";
 
 
@@ -83,6 +84,8 @@ let startState=[ [ "blackRock1","blackKnight1","blackBishop1","blackQueen","blac
 const [ StartState,pieces,blackPieces,whitePieces ]=createBoardAndPieces( startState );
 
 export let game=new GameTree( StartState,5,pieces,blackPieces,whitePieces );
+// initialize the UI/board interactions after creating the game instance
+initDesignBoard(game);
 // game.currentState.CalculationOfPossibleMoves()
 document.body.addEventListener( "keydown",( e ) => {
     if( e.key=="ArrowLeft" )
