@@ -20,3 +20,14 @@ Disclaimer: This project was created for educational and recreational purposes a
 ## Notes
 
 - This project is intended as a learning / demo project. The AI implementations are simple and can be optimized.
+
+## License & attribution
+
+This project is licensed under the MIT License (see `LICENSE`). You are welcome to view, fork, and reuse the code under the terms of the MIT license. When redistributing or reusing code from this repository, please:
+
+- Retain the `LICENSE` file and copyright notice.
+- Give visible credit to the original project and author (for example: "Based on chess by Parsafrr").
+
+If you need a special permission (for example, a separate commercial or proprietary license beyond the MIT terms) or would like an explicit attribution line to include in your product, please contact the repository owner `Parsafrr` via GitHub to request permission.
+
+Note: the text of the `LICENSE` file is the authoritative legal statement. The above are requests and best-practice guidance to ensure proper credit.
