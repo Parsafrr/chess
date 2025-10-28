@@ -33,7 +33,7 @@ If you have Node.js installed, you can install and run `http-server` quickly.
 
 ```cmd
 npm install -g http-server
-cd C:\parsa\projectAi\chess\final\chess
+cd chess
 http-server -c-1
 ```
 
@@ -44,7 +44,7 @@ Then open the URL printed by `http-server` (usually `http://127.0.0.1:8080`) in 
 If you have Python 3 installed, run the built-in HTTP server from the project directory:
 
 ```cmd
-cd C:\parsa\projectAi\chess\final\chess
+cd chess
 python -m http.server 8000
 ```
 
